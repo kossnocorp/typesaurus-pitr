@@ -7,20 +7,47 @@ import {
 } from "typesaurus/adapter/admin/core";
 import { firestoreSymbol } from "typesaurus/adapter/admin/firebase";
 
-export function recover(time, sp) {
-  const db = sp.request[dbSymbol];
-  const firestore = db[firestoreSymbol]();
-
+export async function recover(time, sps) {
   // Floor the minute to avoid Firestore complaining
   const time_ = new Date(time);
   time_.setSeconds(0, 0);
+  const transactionOptions = {
+    readOnly: true,
+    readTime: Timestamp.fromDate(time_),
+  };
 
-  return firestore
-    .runTransaction((transaction) => unwrapRequest(transaction, sp.request), {
-      readOnly: true,
-      readTime: Timestamp.fromDate(time_),
-    })
-    .then((result) => wrapResult(sp.request, result));
+  // Each subscription promise can belong to a different database, make sure
+  // they are grouped correctly
+  const firestores = {};
+  const firestoreToSPSPairs = {};
+  [].concat(sps).forEach((sp, index) => {
+    const db = sp.request[dbSymbol];
+    const firestore = db[firestoreSymbol]();
+    const firestoreId = firestore._databaseId;
+    firestores[firestoreId] = firestore;
+    (firestoreToSPSPairs[firestoreId] ||= []).push([sp, index]);
+  });
+
+  // Collect results using a transaction for each database instance
+  const results = [];
+  await Promise.all(
+    Object.entries(firestoreToSPSPairs).map(([firestoreId, spPairs]) =>
+      firestores[firestoreId].runTransaction(
+        (transaction) =>
+          Promise.all(
+            spPairs.map(([sp, index]) =>
+              unwrapRequest(transaction, sp.request).then(
+                (result) => (results[index] = wrapResult(sp.request, result))
+              )
+            )
+          ),
+        transactionOptions
+      )
+    )
+  );
+
+  // Return single result if the argument was a single subscription promise
+  return Array.isArray(sps) ? results : results[0];
 }
 
 function unwrapRequest(transaction, request) {

@@ -46,8 +46,8 @@ describe("recover", () => {
   });
 
   it("allows to get all documents", async () => {
-    const allSP = db.pitr.all();
-    const [past, now] = await Promise.all([recover(pastTime, allSP), allSP]);
+    const sp = db.pitr.all();
+    const [past, now] = await Promise.all([recover(pastTime, sp), sp]);
 
     expect(nowHour).not.toEqual(pastHour);
     expect(past?.map((user) => user.data)).toEqual([
@@ -106,6 +106,23 @@ describe("recover", () => {
     expect(now?.map((user) => user?.data)).toEqual([
       expect.objectContaining({ type: "test", time: nowHour, flag: true }),
       expect.objectContaining({ type: "test3", time: nowHour, flag: true }),
+    ]);
+  });
+
+  it("allows to perform multiple requests", async () => {
+    const allSP = db.pitr.all();
+    const querySP = db.pitr.query(($) => $.field("flag").eq(true));
+    const [pastAll, pastQuery] = await recover(pastTime, [allSP, querySP]);
+
+    expect(pastAll?.map((user) => user.data)).toEqual([
+      expect.objectContaining({ type: "test", time: pastHour }),
+      expect.objectContaining({ type: "test2", time: pastHour }),
+      expect.objectContaining({ type: "test3", time: pastHour }),
+      expect.objectContaining({ type: "test4", time: pastHour }),
+    ]);
+    expect(pastQuery?.map((user) => user.data)).toEqual([
+      expect.objectContaining({ type: "test2", time: pastHour, flag: true }),
+      expect.objectContaining({ type: "test3", time: pastHour, flag: true }),
     ]);
   });
 });
