@@ -1,6 +1,6 @@
 {
   "name": "@typesaurus/recovery",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Point-in-time recovery (PITR) adapter for Typesaurus",
   "main": "index.js",
   "module": "index.mjs",

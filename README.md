@@ -2,7 +2,7 @@
 
 [Point-in-time recovery](https://firebase.google.com/docs/firestore/pitr) (PITR) adapter for [Typesaurus](https://github.com/kossnocorp/typesaurus), type-safe Firestore ODM.
 
-→ [Read docs](https://typesaurus.com/integrations/recover/)
+→ [Read docs](https://typesaurus.com/integrations/recovery/)
 
 ## Installation
 
