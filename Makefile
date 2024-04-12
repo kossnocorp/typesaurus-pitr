@@ -1,8 +1,9 @@
 test:
-	@npx vitest run
+	env GOOGLE_APPLICATION_CREDENTIALS=${CURDIR}/secrets/key.json npx vitest run
+.PHONY: test
 
 test-watch:
-	@npx vitest
+	env GOOGLE_APPLICATION_CREDENTIALS=${CURDIR}/secrets/key.json npx vitest
 
 types:
 	@npx tsc --noEmit

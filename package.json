@@ -1,7 +1,7 @@
 {
-  "name": "@typesaurus/pitr",
+  "name": "@typesaurus/recovery",
   "version": "0.1.0",
-  "description": "",
+  "description": "Point-in-time recovery (PITR) adapter for Typesaurus",
   "main": "index.js",
   "module": "index.mjs",
   "exports": {
@@ -43,9 +43,14 @@
     "@babel/preset-typescript": "^7.24.1",
     "@parcel/watcher": "^2.4.1",
     "babel-plugin-add-import-extension": "^1.6.0",
+    "date-fns": "^3.6.0",
+    "firebase-admin": "^12.0.0",
     "glob": "^10.3.12",
-    "typesaurus": "^10.3.0",
-    "typescript": "^5.4.3",
+    "typesaurus": "^10.6.0",
+    "typescript": "^5.4.5",
     "vitest": "^1.4.0"
+  },
+  "peerDependencies": {
+    "typesaurus": ">=10.6.0"
   }
 }
